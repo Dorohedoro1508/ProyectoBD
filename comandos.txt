@@ -1,0 +1,6 @@
+pip freeze > requirements.txt //Actualizar dependencias
+pip install -r requirements.txt //Instalar dependencias
+python manage.py makemigrations //Crear migraciones
+python manage.py migrate //Migrar
+python manage.py runserver //Ejecutar servidor
+python manage.py createsuperuser //Crear usuario

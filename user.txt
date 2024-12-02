@@ -1,0 +1,15 @@
+Username: Admin
+Password: admin 
+correos: sebas125225@gmail.com
+
+from django.contrib.auth.models import User, Group
+
+# Obtén el usuario y el grupo
+user = User.objects.get(username="Admin")
+group = Group.objects.get(name="Administrador")  # Cambia por "Empleado" o "Auditor"
+
+# Asigna el usuario al grupo
+user.groups.add(group)
+
+# Confirma que el usuario pertenece al grupo
+print(user.groups.all())
