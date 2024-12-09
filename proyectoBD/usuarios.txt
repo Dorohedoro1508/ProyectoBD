@@ -1,0 +1,16 @@
+Perfiles
+
+Nivel Administrador
+Usuario: Jhony
+Contaseña:proyectobd
+
+Nivel Auditor
+Usuario: Ian
+Contaseña: proyectobd
+
+Nivel Empleado
+Usuario: Marisol
+Contaseña: proyectobd
+
+Usuario: Sebas
+Contaseña: proyectobd

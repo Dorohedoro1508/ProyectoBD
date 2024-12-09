@@ -1,17 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.decorators import login_required, user_passes_test
-from app_db.models import Producto, Inventario, Empleado, Distribuidor, OrdenDistribuidor, DetalleOrden # type: ignore
-import os
-from django.http import HttpResponse
-from django.utils.timezone import now
-import shutil
-from django.contrib import messages
-from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from app_db.models import Producto, Inventario, Empleado, Distribuidor, OrdenDistribuidor, DetalleOrden
+from app_db.forms import ProductoForm, InventarioForm, EmpleadoForm, DistribuidorForm, OrdenDistribuidorForm, DetalleOrdenForm
 
-
-
-#Vistas para Producto
+# Producto
 @permission_required('app_db.view_producto', raise_exception=True)
 def producto_list(request):
     productos = Producto.objects.all()
@@ -20,23 +13,25 @@ def producto_list(request):
 @permission_required('app_db.add_producto', raise_exception=True)
 def producto_create(request):
     if request.method == "POST":
-        nom_pro = request.POST.get("nom_pro")
-        des_pro = request.POST.get("des_pro")
-        pre_pro = request.POST.get("pre_pro")
-        Producto.objects.create(nom_pro=nom_pro, des_pro=des_pro, pre_pro=pre_pro)
-        return redirect('admin_producto_list')
-    return render(request, 'admin/producto_form.html')
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_producto_list')
+    else:
+        form = ProductoForm()
+    return render(request, 'admin/producto_form.html', {'form': form})
 
 @permission_required('app_db.change_producto', raise_exception=True)
 def producto_update(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     if request.method == "POST":
-        producto.nom_pro = request.POST.get("nom_pro")
-        producto.des_pro = request.POST.get("des_pro")
-        producto.pre_pro = request.POST.get("pre_pro")
-        producto.save()
-        return redirect('admin_producto_list')
-    return render(request, 'admin/producto_form.html', {'producto': producto})
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_producto_list')
+    else:
+        form = ProductoForm(instance=producto)
+    return render(request, 'admin/producto_form.html', {'form': form})
 
 @permission_required('app_db.delete_producto', raise_exception=True)
 def producto_delete(request, pk):
@@ -47,38 +42,34 @@ def producto_delete(request, pk):
     return render(request, 'admin/producto_confirm_delete.html', {'producto': producto})
 
 
-# Vistas para Inventario
+# Inventario
 @permission_required('app_db.view_inventario', raise_exception=True)
 def inventario_list(request):
-    inventarios = Inventario.objects.select_related('id_pro').all()
+    inventarios = Inventario.objects.all()
     return render(request, 'admin/inventario_list.html', {'inventarios': inventarios})
 
 @permission_required('app_db.add_inventario', raise_exception=True)
 def inventario_create(request):
     if request.method == "POST":
-        fec_inv = request.POST.get("fec_inv")
-        can_inv = request.POST.get("can_inv")
-        ubi_inv = request.POST.get("ubi_inv")
-        id_pro = request.POST.get("id_pro")
-        producto = Producto.objects.get(pk=id_pro)
-        Inventario.objects.create(fec_inv=fec_inv, can_inv=can_inv, ubi_inv=ubi_inv, id_pro=producto)
-        return redirect('admin_inventario_list')
-    productos = Producto.objects.all()
-    return render(request, 'admin/inventario_form.html', {'productos': productos})
+        form = InventarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_inventario_list')
+    else:
+        form = InventarioForm()
+    return render(request, 'admin/inventario_form.html', {'form': form})
 
 @permission_required('app_db.change_inventario', raise_exception=True)
 def inventario_update(request, pk):
     inventario = get_object_or_404(Inventario, pk=pk)
     if request.method == "POST":
-        inventario.fec_inv = request.POST.get("fec_inv")
-        inventario.can_inv = request.POST.get("can_inv")
-        inventario.ubi_inv = request.POST.get("ubi_inv")
-        id_pro = request.POST.get("id_pro")
-        inventario.id_pro = Producto.objects.get(pk=id_pro)
-        inventario.save()
-        return redirect('admin_inventario_list')
-    productos = Producto.objects.all()
-    return render(request, 'admin/inventario_form.html', {'inventario': inventario, 'productos': productos})
+        form = InventarioForm(request.POST, instance=inventario)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_inventario_list')
+    else:
+        form = InventarioForm(instance=inventario)
+    return render(request, 'admin/inventario_form.html', {'form': form})
 
 @permission_required('app_db.delete_inventario', raise_exception=True)
 def inventario_delete(request, pk):
@@ -88,8 +79,7 @@ def inventario_delete(request, pk):
         return redirect('admin_inventario_list')
     return render(request, 'admin/inventario_confirm_delete.html', {'inventario': inventario})
 
-
-# Vistas para Empleado
+# Empleado
 @permission_required('app_db.view_empleado', raise_exception=True)
 def empleado_list(request):
     empleados = Empleado.objects.all()
@@ -98,23 +88,25 @@ def empleado_list(request):
 @permission_required('app_db.add_empleado', raise_exception=True)
 def empleado_create(request):
     if request.method == "POST":
-        nomb_emp = request.POST.get("nomb_emp")
-        pue_emp = request.POST.get("pue_emp")
-        fec_emp = request.POST.get("fec_emp")
-        Empleado.objects.create(nomb_emp=nomb_emp, pue_emp=pue_emp, fec_emp=fec_emp)
-        return redirect('admin_empleado_list')
-    return render(request, 'admin/empleado_form.html')
+        form = EmpleadoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_empleado_list')
+    else:
+        form = EmpleadoForm()
+    return render(request, 'admin/empleado_form.html', {'form': form})
 
 @permission_required('app_db.change_empleado', raise_exception=True)
 def empleado_update(request, pk):
     empleado = get_object_or_404(Empleado, pk=pk)
     if request.method == "POST":
-        empleado.nomb_emp = request.POST.get("nomb_emp")
-        empleado.pue_emp = request.POST.get("pue_emp")
-        empleado.fec_emp = request.POST.get("fec_emp")
-        empleado.save()
-        return redirect('admin_empleado_list')
-    return render(request, 'admin/empleado_form.html', {'empleado': empleado})
+        form = EmpleadoForm(request.POST, instance=empleado)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_empleado_list')
+    else:
+        form = EmpleadoForm(instance=empleado)
+    return render(request, 'admin/empleado_form.html', {'form': form})
 
 @permission_required('app_db.delete_empleado', raise_exception=True)
 def empleado_delete(request, pk):
@@ -124,7 +116,7 @@ def empleado_delete(request, pk):
         return redirect('admin_empleado_list')
     return render(request, 'admin/empleado_confirm_delete.html', {'empleado': empleado})
 
-# Vistas para Distribuidor
+# Distribuidor
 @permission_required('app_db.view_distribuidor', raise_exception=True)
 def distribuidor_list(request):
     distribuidores = Distribuidor.objects.all()
@@ -133,23 +125,25 @@ def distribuidor_list(request):
 @permission_required('app_db.add_distribuidor', raise_exception=True)
 def distribuidor_create(request):
     if request.method == "POST":
-        nom_dis = request.POST.get("nom_dis")
-        tel_dis = request.POST.get("tel_dis")
-        dir_dis = request.POST.get("dir_dis")
-        Distribuidor.objects.create(nom_dis=nom_dis, tel_dis=tel_dis, dir_dis=dir_dis)
-        return redirect('admin_distribuidor_list')
-    return render(request, 'admin/distribuidor_form.html')
+        form = DistribuidorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_distribuidor_list')
+    else:
+        form = DistribuidorForm()
+    return render(request, 'admin/distribuidor_form.html', {'form': form})
 
 @permission_required('app_db.change_distribuidor', raise_exception=True)
 def distribuidor_update(request, pk):
     distribuidor = get_object_or_404(Distribuidor, pk=pk)
     if request.method == "POST":
-        distribuidor.nom_dis = request.POST.get("nom_dis")
-        distribuidor.tel_dis = request.POST.get("tel_dis")
-        distribuidor.dir_dis = request.POST.get("dir_dis")
-        distribuidor.save()
-        return redirect('admin_distribuidor_list')
-    return render(request, 'admin/distribuidor_form.html', {'distribuidor': distribuidor})
+        form = DistribuidorForm(request.POST, instance=distribuidor)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_distribuidor_list')
+    else:
+        form = DistribuidorForm(instance=distribuidor)
+    return render(request, 'admin/distribuidor_form.html', {'form': form})
 
 @permission_required('app_db.delete_distribuidor', raise_exception=True)
 def distribuidor_delete(request, pk):
@@ -159,147 +153,123 @@ def distribuidor_delete(request, pk):
         return redirect('admin_distribuidor_list')
     return render(request, 'admin/distribuidor_confirm_delete.html', {'distribuidor': distribuidor})
 
-# Vistas para OrdenDistribuidor
-@permission_required('app_db.view_ordendistribuidor', raise_exception=True)
-def ordendistribuidor_list(request):
-    ordenes = OrdenDistribuidor.objects.select_related('id_dis', 'id_emp').all()
-    return render(request, 'admin/ordendistribuidor_list.html', {'ordenes': ordenes})
+# OrdenDistribuidor
+# Listar OrdenDistribuidor
+@login_required
+def orden_distribuidor_list(request):
+    ordenes = OrdenDistribuidor.objects.all()
+    return render(request, 'admin/orden_distribuidor_list.html', {'ordenes': ordenes})
 
-@permission_required('app_db.add_ordendistribuidor', raise_exception=True)
-def ordendistribuidor_create(request):
-    if request.method == "POST":
-        fec_ord = request.POST.get("fec_ord")
-        est_ord = request.POST.get("est_ord")
-        id_dis = request.POST.get("id_dis")
-        id_emp = request.POST.get("id_emp")
-        distribuidor = Distribuidor.objects.get(pk=id_dis)
-        empleado = Empleado.objects.get(pk=id_emp)
-        OrdenDistribuidor.objects.create(fec_ord=fec_ord, est_ord=est_ord, id_dis=distribuidor, id_emp=empleado)
-        return redirect('admin_ordendistribuidor_list')
-    distribuidores = Distribuidor.objects.all()
-    empleados = Empleado.objects.all()
-    return render(request, 'admin/ordendistribuidor_form.html', {'distribuidores': distribuidores, 'empleados': empleados})
+# Crear OrdenDistribuidor
+@login_required
+def orden_distribuidor_create(request):
+    if request.method == 'POST':
+        form = OrdenDistribuidorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_orden_distribuidor_list')
+    else:
+        form = OrdenDistribuidorForm()
+    return render(request, 'admin/orden_distribuidor_form.html', {'form': form})
 
-@permission_required('app_db.change_ordendistribuidor', raise_exception=True)
-def ordendistribuidor_update(request, pk):
-    orden = get_object_or_404(OrdenDistribuidor, pk=pk)
-    if request.method == "POST":
-        orden.fec_ord = request.POST.get("fec_ord")
-        orden.est_ord = request.POST.get("est_ord")
-        id_dis = request.POST.get("id_dis")
-        id_emp = request.POST.get("id_emp")
-        orden.id_dis = Distribuidor.objects.get(pk=id_dis)
-        orden.id_emp = Empleado.objects.get(pk=id_emp)
-        orden.save()
-        return redirect('admin_ordendistribuidor_list')
-    distribuidores = Distribuidor.objects.all()
-    empleados = Empleado.objects.all()
-    return render(request, 'admin/ordendistribuidor_form.html', {'orden': orden, 'distribuidores': distribuidores, 'empleados': empleados})
+# Editar OrdenDistribuidor
+@login_required
+def orden_distribuidor_edit(request, id_ord):
+    orden = get_object_or_404(OrdenDistribuidor, id_ord=id_ord)
+    if request.method == 'POST':
+        form = OrdenDistribuidorForm(request.POST, instance=orden)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_orden_distribuidor_list')
+    else:
+        form = OrdenDistribuidorForm(instance=orden)
+    return render(request, 'admin/orden_distribuidor_form.html', {'form': form})
 
-@permission_required('app_db.delete_ordendistribuidor', raise_exception=True)
-def ordendistribuidor_delete(request, pk):
-    orden = get_object_or_404(OrdenDistribuidor, pk=pk)
-    if request.method == "POST":
+# Eliminar OrdenDistribuidor
+@login_required
+def orden_distribuidor_delete(request, id_ord):
+    orden = get_object_or_404(OrdenDistribuidor, id_ord=id_ord)
+    if request.method == 'POST':
         orden.delete()
-        return redirect('admin_ordendistribuidor_list')
-    return render(request, 'admin/ordendistribuidor_confirm_delete.html', {'orden': orden})
+        return redirect('admin_orden_distribuidor_list')
+    return render(request, 'admin/orden_distribuidor_confirm_delete.html', {'orden': orden})
 
-# Vistas para DetalleOrden
-@permission_required('app_db.view_detalleorden', raise_exception=True)
-def detalleorden_list(request):
-    detalles = DetalleOrden.objects.select_related('id_ord', 'id_pro').all()
-    return render(request, 'admin/detalleorden_list.html', {'detalles': detalles})
+# Listar Detalles de Orden
+@login_required
+def detalle_orden_list(request):
+    detalles = DetalleOrden.objects.all()
+    return render(request, 'admin/detalle_orden_list.html', {'detalles': detalles})
 
-@permission_required('app_db.add_detalleorden', raise_exception=True)
-def detalleorden_create(request):
-    if request.method == "POST":
-        id_ord = request.POST.get("id_ord")
-        id_pro = request.POST.get("id_pro")
-        can_pro = request.POST.get("can_pro")
-        pre_uni = request.POST.get("pre_uni")
-        orden = OrdenDistribuidor.objects.get(pk=id_ord)
-        producto = Producto.objects.get(pk=id_pro)
-        DetalleOrden.objects.create(id_ord=orden, id_pro=producto, can_pro=can_pro, pre_uni=pre_uni)
-        return redirect('admin_detalleorden_list')
-    ordenes = OrdenDistribuidor.objects.all()
-    productos = Producto.objects.all()
-    return render(request, 'admin/detalleorden_form.html', {'ordenes': ordenes, 'productos': productos})
+# Agregar Detalle de Orden
+@login_required
+def detalle_orden_create(request):
+    if request.method == 'POST':
+        form = DetalleOrdenForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_detalleorden_list')
+    else:
+        form = DetalleOrdenForm()
+    return render(request, 'admin/detalle_orden_form.html', {'form': form})
 
-@permission_required('app_db.change_detalleorden', raise_exception=True)
-def detalleorden_update(request, pk):
-    detalle = get_object_or_404(DetalleOrden, pk=pk)
-    if request.method == "POST":
-        detalle.can_pro = request.POST.get("can_pro")
-        detalle.pre_uni = request.POST.get("pre_uni")
-        id_ord = request.POST.get("id_ord")
-        id_pro = request.POST.get("id_pro")
-        detalle.id_ord = OrdenDistribuidor.objects.get(pk=id_ord)
-        detalle.id_pro = Producto.objects.get(pk=id_pro)
-        detalle.save()
-        return redirect('admin_detalleorden_list')
-    ordenes = OrdenDistribuidor.objects.all()
-    productos = Producto.objects.all()
-    return render(request, 'admin/detalleorden_form.html', {'detalle': detalle, 'ordenes': ordenes, 'productos': productos})
+# Editar Detalle de Orden
+@login_required
+def detalle_orden_edit(request, id_det):
+    detalle = get_object_or_404(DetalleOrden, pk=id_det)
+    if request.method == 'POST':
+        form = DetalleOrdenForm(request.POST, instance=detalle)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_detalleorden_list')
+    else:
+        form = DetalleOrdenForm(instance=detalle)
+    return render(request, 'admin/detalle_orden_form.html', {'form': form})
 
-@permission_required('app_db.delete_detalleorden', raise_exception=True)
-def detalleorden_delete(request, pk):
-    detalle = get_object_or_404(DetalleOrden, pk=pk)
-    if request.method == "POST":
+# Eliminar Detalle de Orden
+@login_required
+def detalle_orden_delete(request, id_det):
+    detalle = get_object_or_404(DetalleOrden, pk=id_det)
+    if request.method == 'POST':
         detalle.delete()
         return redirect('admin_detalleorden_list')
-    return render(request, 'admin/detalleorden_confirm_delete.html', {'detalle': detalle})
+    return render(request, 'admin/detalle_orden_confirm_delete.html', {'detalle': detalle})
 
-@login_required
-@user_passes_test(lambda u: u.groups.filter(name='Administrador').exists())
-def admin_dashboard(request):
-    return render(request, 'admin/dashboard.html')
+from django.http import FileResponse
+import os
 
-# Vistas para BackupRecord
-# Descargar respaldo
+@permission_required('app_db.view_producto', raise_exception=True)  # Cambia el permiso según sea necesario
 def descargar_respaldo(request):
-    # Directorio de respaldos
-    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
-    os.makedirs(backup_dir, exist_ok=True)
+    db_file = os.path.join(settings.BASE_DIR, 'db.sqlite3')
+    backup_file = os.path.join(settings.BASE_DIR, 'backup.sqlite3')
 
-    # Nombre del archivo de respaldo
-    timestamp = now().strftime('%Y%m%d_%H%M%S')
-    backup_file = os.path.join(backup_dir, f'respaldo_{timestamp}.sqlite3')
+    if os.path.exists(db_file):
+        with open(db_file, 'rb') as db, open(backup_file, 'wb') as backup:
+            backup.write(db.read())
 
-    # Ruta de la base de datos desde settings.py
-    db_file = settings.DATABASES['default']['NAME']
+        return FileResponse(open(backup_file, 'rb'), as_attachment=True, filename='backup.sqlite3')
+    else:
+        return HttpResponseNotFound('El archivo de la base de datos no existe.')
 
-    if not os.path.exists(db_file):
-        return HttpResponse("El archivo de la base de datos no existe.", status=404)
+from django.shortcuts import render
+from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponse
+import os
 
-    # Copiar el archivo de la base de datos al respaldo
-    with open(db_file, 'rb') as db, open(backup_file, 'wb') as backup:
-        backup.write(db.read())
-
-    # Preparar la descarga
-    with open(backup_file, 'rb') as f:
-        response = HttpResponse(f.read(), content_type='application/x-sqlite3')
-        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(backup_file)}"'
-        return response
-    
-# Subir respaldo
-@user_passes_test(lambda u: u.groups.filter(name='Administrador').exists())
+@permission_required('app_db.add_producto', raise_exception=True)  # Cambia el permiso según sea necesario
 def subir_respaldo(request):
-    if request.method == 'POST' and 'backup_file' in request.FILES:
-        backup_file = request.FILES['backup_file']
-        db_file = settings.DATABASES['default']['NAME']  # Ruta actual de la base de datos
+    if request.method == "POST" and request.FILES.get("backup_file"):
+        backup_file = request.FILES["backup_file"]
+        backup_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
 
-        # Validar que el archivo subido tenga el formato correcto
-        if not backup_file.name.endswith('.sqlite3'):
-            messages.error(request, "El archivo no es un respaldo válido.")
-            return redirect('subir_respaldo')
-
-        # Guardar el archivo subido como la base de datos activa
-        with open(db_file, 'wb') as destination:
+        with open(backup_path, "wb") as db_file:
             for chunk in backup_file.chunks():
-                destination.write(chunk)
+                db_file.write(chunk)
 
-        messages.success(request, "La base de datos se restauró exitosamente.")
-        return redirect('admin_dashboard')
-
-    # Renderizar el formulario si no es un método POST
+        return HttpResponse("Respaldo restaurado con éxito.")
     return render(request, 'admin/subir_respaldo.html')
+
+# Dashboard
+@login_required
+def admin_dashboard(request):
+    # Esta vista muestra un dashboard con enlaces a las secciones administrativas.
+    return render(request, 'admin/dashboard.html')

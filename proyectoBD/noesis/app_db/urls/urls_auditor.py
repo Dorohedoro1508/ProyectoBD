@@ -1,5 +1,5 @@
 from django.urls import path
-from app_db.views import auditor_views
+from app_db.views import auditor_views  # type: ignore
 
 urlpatterns = [
     # Producto
@@ -15,11 +15,14 @@ urlpatterns = [
     path('distribuidores/', auditor_views.distribuidor_list, name='auditor_distribuidor_list'),
 
     # OrdenDistribuidor
-    path('ordenes/', auditor_views.ordendistribuidor_list, name='auditor_ordendistribuidor_list'),
+    path('ordenes/', auditor_views.orden_distribuidor_list, name='auditor_orden_distribuidor_list'),
 
     # DetalleOrden
-    path('detalles/', auditor_views.detalleorden_list, name='auditor_detalleorden_list'),
+    path('detalles/', auditor_views.detalle_orden_list, name='auditor_detalle_orden_list'),
 
     # Dashboard
     path('dashboard/', auditor_views.auditor_dashboard, name='auditor_dashboard'),
+
+    path('dashboard/', auditor_views.auditor_dashboard, name='auditor_dashboard'),
+
 ]

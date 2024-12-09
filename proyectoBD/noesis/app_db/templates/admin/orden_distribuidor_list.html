@@ -1,9 +1,7 @@
-{% extends "base.html" %}
-
-{% block title %}Lista de Órdenes de Distribuidor{% endblock %}
-
+{% extends 'base.html' %}
 {% block content %}
-<h2>Lista de Órdenes de Distribuidor</h2>
+<h1>Lista de Órdenes de Distribuidor</h1>
+<a href="{% url 'admin_ordendistribuidor_add' %}">Agregar Orden</a>
 <table>
     <thead>
         <tr>
@@ -21,15 +19,14 @@
             <td>{{ orden.id_ord }}</td>
             <td>{{ orden.fec_ord }}</td>
             <td>{{ orden.est_ord }}</td>
-            <td>{{ orden.id_dis.nom_dis }}</td>
-            <td>{{ orden.id_emp.nomb_emp }}</td>
+            <td>{{ orden.id_dis }}</td>
+            <td>{{ orden.id_emp }}</td>
             <td>
-                <a href="{% url 'admin_ordendistribuidor_update' orden.id_ord %}">Editar</a> |
+                <a href="{% url 'admin_ordendistribuidor_edit' orden.id_ord %}">Editar</a>
                 <a href="{% url 'admin_ordendistribuidor_delete' orden.id_ord %}">Eliminar</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'admin_ordendistribuidor_create' %}" class="btn">Crear Orden</a>
 {% endblock %}
